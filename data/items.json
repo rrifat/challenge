@@ -1,7 +1,56 @@
 [
-  { "id": 1, "name": "Laptop Pro", "category": "Electronics", "price": 2499 },
-  { "id": 2, "name": "Noise Cancelling Headphones", "category": "Electronics", "price": 399 },
-  { "id": 3, "name": "Ultra‑Wide Monitor", "category": "Electronics", "price": 999 },
-  { "id": 4, "name": "Ergonomic Chair", "category": "Furniture", "price": 799 },
-  { "id": 5, "name": "Standing Desk", "category": "Furniture", "price": 1199 }
+  {
+    "id": 1,
+    "name": "Laptop Pro",
+    "category": "Electronics",
+    "price": 2499
+  },
+  {
+    "id": 2,
+    "name": "Noise Cancelling Headphones",
+    "category": "Electronics",
+    "price": 399
+  },
+  {
+    "id": 3,
+    "name": "Ultra‑Wide Monitor",
+    "category": "Electronics",
+    "price": 999
+  },
+  {
+    "id": 4,
+    "name": "Ergonomic Chair",
+    "category": "Furniture",
+    "price": 799
+  },
+  {
+    "id": 5,
+    "name": "Standing Desk",
+    "category": "Furniture",
+    "price": 1199
+  },
+  {
+    "name": "Test item",
+    "description": "Some description",
+    "price": 9.99,
+    "id": 1773569830214
+  },
+  {
+    "name": "New Item Test",
+    "category": "Test Category",
+    "price": 100,
+    "id": 1773573878902
+  },
+  {
+    "name": "New Item Test",
+    "category": "Test Category",
+    "price": 100,
+    "id": 1773573949185
+  },
+  {
+    "name": "New Item Test",
+    "category": "Test Category",
+    "price": 100,
+    "id": 1773573962163
+  }
 ]
