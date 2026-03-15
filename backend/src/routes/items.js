@@ -1,8 +1,7 @@
 const express = require('express');
 const fs = require('fs');
-const path = require('path');
+const { DATA_PATH } = require('../constants');
 const router = express.Router();
-const DATA_PATH = path.join(__dirname, '../../../data/items.json');
 
 async function readData() {
   const raw = await fs.promises.readFile(DATA_PATH);
