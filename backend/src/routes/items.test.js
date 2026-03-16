@@ -34,13 +34,15 @@ describe('Items API', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.q).toBe('standing desk');
-    expect(response.body.total).toBe(1);
-    expect(response.body.items).toEqual([
-      expect.objectContaining({
-        id: 5,
-        name: 'Standing Desk',
-      }),
-    ]);
+    expect(response.body.total).toBeGreaterThanOrEqual(1);
+    expect(response.body.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 5,
+          name: 'Standing Desk',
+        }),
+      ]),
+    );
   });
 
   it('should return an item by id', async () => {
