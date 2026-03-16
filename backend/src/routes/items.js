@@ -1,6 +1,6 @@
 const express = require('express');
 const fs = require('fs');
-const { DATA_PATH } = require('../constants');
+const { DATA_PATH, DEFAULT_RESPONSE_LIMIT } = require('../constants');
 const router = express.Router();
 
 async function readData() {
@@ -14,15 +14,19 @@ router.get('/', async (req, res, next) => {
     const data = await readData();
     const { limit, q } = req.query;
     let results = data;
+    const parsedLimit = limit === undefined ? DEFAULT_RESPONSE_LIMIT : Number(limit);
 
     if (q) {
       // Simple substring search (sub‑optimal)
       results = results.filter(item => item.name.toLowerCase().includes(q.toLowerCase()));
     }
 
-    if (limit) {
-      results = results.slice(0, parseInt(limit));
+    if (!Number.isInteger(parsedLimit) || parsedLimit < 0) {
+        const err = new Error('Invalid limit');
+        err.status = 400;
+        throw err;
     }
+    results = results.slice(0, parsedLimit);
 
     res.json(results);
   } catch (err) {

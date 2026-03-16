@@ -67,3 +67,37 @@ Caching also brings a few trade-offs:
 - if the file becomes invalid, the cache may keep serving the last good value until the file is fixed
 
 Even with those trade-offs, caching is a good fit here because stats are likely to be read more often than the data changes.
+
+## Frontend memory leak fix
+
+### What changed
+
+The items page and data context were updated so an in-flight request can be canceled when the page unmounts.
+
+- `frontend/src/pages/Items.js` now creates an `AbortController` inside `useEffect`
+- the cleanup function now calls `controller.abort()`
+- `frontend/src/state/DataContext.js` now accepts a `signal` and passes it to `fetch(...)`
+- abort errors are ignored, while real errors are still thrown
+
+### Why it matters
+
+Before this change, the items request could still in progress after the user left the page.
+
+That means the app could keep doing unnecessary work after the component was gone. It also makes the code harder to reason about when requests are slow.
+
+By canceling the request in cleanup, the page behaves more safely:
+
+- the request stops when the component unmounts
+- the app avoids updating shared state from a request that is no longer needed
+- the code is better prepared for future search and pagination work
+
+### Trade-offs
+
+This fix adds a small amount of extra code:
+
+- an `AbortController` must be created in the effect
+- the fetch helper now accepts a `signal`
+- abort errors must be handled separately from normal failures
+- code is a bit messy now and has lost some readability, which leaves room for improvement
+
+That trade-off is small and worth it because the request lifecycle is now handled more cleanly.
