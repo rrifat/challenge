@@ -1,26 +1,50 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useReducer } from 'react';
 
 const DataContext = createContext();
 
 export function DataProvider({ children }) {
-  const [items, setItems] = useState([]);
 
-  const fetchItems = useCallback(async ({signal, limit = 20}) => {
+  const [state, setState] = useReducer((prev, curr) => {
+    return { ...prev, ...curr }
+  }, { items: [], limit: 5, total: 0, totalPages: 1, loading: false, error: null })
+
+  const fetchItems = useCallback(async ({ signal, page: nextPage = 1, limit: nextLimit = 20, q = '' } = {}) => {
+    const params = new URLSearchParams({
+      page: String(nextPage),
+      limit: String(nextLimit)
+    });
+
+    if (q.trim()) {
+      params.set('q', q.trim());
+    }
+
+    setState({ loading: true, error: null });
+
     try {
-      const res = await fetch(`http://localhost:3001/api/items?limit=${limit}`, {
+      const res = await fetch(`http://localhost:3001/api/items?${params.toString()}`, {
         signal,
       });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch items');
+      }
+
       const json = await res.json();
-      setItems(json);
+      setState({ items: json.items, limit: json.limit, total: json.total, totalPages: json.totalPages });
     } catch (err) {
       if (err.name !== 'AbortError') {
+        setState({ error: err.message });
         throw err;
       }
+    } finally {
+      setState({ loading: false });
     }
   }, []);
 
   return (
-    <DataContext.Provider value={{ items, fetchItems }}>
+    <DataContext.Provider
+      value={{ ...state, fetchItems }}
+    >
       {children}
     </DataContext.Provider>
   );
