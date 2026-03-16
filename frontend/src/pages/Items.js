@@ -1,11 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useData } from '../state/DataContext';
 import { Link } from 'react-router-dom';
+import { List } from 'react-window';
+
+const ITEM_HEIGHT = 64;
+const MAX_VISIBLE_ITEMS = 8;
+const LIMIT = 100
+
+function Row({ ariaAttributes, index, items, style }) {
+  const item = items[index];
+
+  return (
+    <li
+      {...ariaAttributes}
+      style={{ ...style, boxSizing: 'border-box', paddingBottom: 8 }}
+    >
+      <div
+        style={{
+          height: ITEM_HEIGHT - 8,
+          boxSizing: 'border-box',
+          border: '1px solid #ddd',
+          borderRadius: 8,
+          padding: 12,
+          display: 'flex',
+          alignItems: 'center'
+        }}
+      >
+        <Link to={'/items/' + item.id}>{item.name}</Link>
+      </div>
+    </li>
+  );
+}
 
 function Items() {
   const {
     items,
-    limit,
     total,
     totalPages,
     loading,
@@ -15,16 +44,23 @@ function Items() {
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
+  const listRef = useRef(null);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    fetchItems({ signal: controller.signal, page, limit, q: query }).catch(console.error);
+    fetchItems({ signal: controller.signal, page, limit: LIMIT, q: query }).catch(console.error);
 
     return () => {
       controller.abort();
     };
-  }, [fetchItems, limit, page, query]);
+  }, [fetchItems, page, query]);
+
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollToRow({ index: 0, align: 'start' });
+    }
+  }, [page, query]);
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
@@ -43,6 +79,8 @@ function Items() {
       setPage(page + 1);
     }
   };
+
+  const listHeight = Math.min(Math.max(items.length, 1), MAX_VISIBLE_ITEMS) * ITEM_HEIGHT;
 
   return (
     <section style={{ padding: 16, display: 'grid', gap: 16 }}>
@@ -76,13 +114,18 @@ function Items() {
       {!loading && !items.length ? (
         <p>No items matched your search.</p>
       ) : (
-        <ul style={{ display: 'grid', gap: 8, padding: 0, listStyle: 'none' }}>
-          {items.map(item => (
-            <li key={item.id} style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12 }}>
-              <Link to={'/items/' + item.id}>{item.name}</Link>
-            </li>
-          ))}
-        </ul>
+        <div aria-label="Items results" style={{ minWidth: 0 }}>
+          <List
+            listRef={listRef}
+            overscanCount={3}
+            rowComponent={Row}
+            rowCount={items.length}
+            rowHeight={ITEM_HEIGHT}
+            rowProps={{ items }}
+            style={{ height: listHeight, width: '100%', margin: 0, padding: 0, listStyle: 'none' }}
+            tagName="ul"
+          />
+        </div>
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

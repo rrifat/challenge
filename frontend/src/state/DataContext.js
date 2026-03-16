@@ -6,7 +6,7 @@ export function DataProvider({ children }) {
 
   const [state, setState] = useReducer((prev, curr) => {
     return { ...prev, ...curr }
-  }, { items: [], limit: 5, total: 0, totalPages: 1, loading: false, error: null })
+  }, { items: [], total: 0, totalPages: 1, loading: false, error: null })
 
   const fetchItems = useCallback(async ({ signal, page: nextPage = 1, limit: nextLimit = 20, q = '' } = {}) => {
     const params = new URLSearchParams({
@@ -30,7 +30,7 @@ export function DataProvider({ children }) {
       }
 
       const json = await res.json();
-      setState({ items: json.items, limit: json.limit, total: json.total, totalPages: json.totalPages });
+      setState({ items: json.items, total: json.total, totalPages: json.totalPages });
     } catch (err) {
       if (err.name !== 'AbortError') {
         setState({ error: err.message });
