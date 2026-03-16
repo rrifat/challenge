@@ -1,34 +1,40 @@
 const express = require('express');
 const fs = require('fs');
 const { DATA_PATH, DEFAULT_RESPONSE_LIMIT } = require('../constants');
-const router = express.Router();
+const {readData, parsePositiveInteger} = require('../utils')
 
-async function readData() {
-  const raw = await fs.promises.readFile(DATA_PATH);
-  return JSON.parse(raw);
-}
+const router = express.Router();
 
 // GET /api/items
 router.get('/', async (req, res, next) => {
   try {
     const data = await readData();
-    const { limit, q } = req.query;
+    const { limit, page, q } = req.query;
     let results = data;
-    const parsedLimit = limit === undefined ? DEFAULT_RESPONSE_LIMIT : Number(limit);
+    const parsedLimit = parsePositiveInteger(limit, DEFAULT_RESPONSE_LIMIT, 'limit');
+    const parsedPage = parsePositiveInteger(page, 1, 'page');
+    const normalizedQuery = typeof q === 'string' ? q.trim().toLowerCase() : '';
 
-    if (q) {
-      // Simple substring search (sub‑optimal)
-      results = results.filter(item => item.name.toLowerCase().includes(q.toLowerCase()));
+    if (normalizedQuery) {
+      results = results.filter(item => {
+        const searchableFields = [item.name, item.category].filter(field => typeof field === 'string');
+        return searchableFields.some(field => field.toLowerCase().includes(normalizedQuery));
+      });
     }
 
-    if (!Number.isInteger(parsedLimit) || parsedLimit < 0) {
-        const err = new Error('Invalid limit');
-        err.status = 400;
-        throw err;
-    }
-    results = results.slice(0, parsedLimit);
+    const total = results.length;
+    const totalPages = Math.max(1, Math.ceil(total / parsedLimit));
+    const startIndex = (parsedPage - 1) * parsedLimit;
+    const paginatedItems = results.slice(startIndex, startIndex + parsedLimit);
 
-    res.json(results);
+    res.json({
+      items: paginatedItems,
+      page: parsedPage,
+      limit: parsedLimit,
+      total,
+      totalPages,
+      q: normalizedQuery
+    });
   } catch (err) {
     next(err);
   }
