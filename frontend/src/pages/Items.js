@@ -84,19 +84,36 @@ function Items() {
 
   return (
     <section style={{ padding: 16, display: 'grid', gap: 16 }}>
-      <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <form
+        onSubmit={handleSearchSubmit}
+        style={{
+          display: 'grid',
+          gap: 10,
+          width: 'min(100%, 42rem)'
+        }}
+      >
         <label htmlFor="item-search" style={{ fontWeight: 600 }}>
           Search items
         </label>
-        <input
-          id="item-search"
-          type="search"
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          placeholder="Search by name or category"
-          style={{ minWidth: 240, padding: '8px 12px' }}
-        />
-        <button type="submit">Search</button>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) auto',
+            gap: 8,
+            alignItems: 'center',
+            width: '100%'
+          }}
+        >
+          <input
+            id="item-search"
+            type="search"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            placeholder="Search by name or category"
+            style={{ minWidth: 0, width: '100%', padding: '10px 12px' }}
+          />
+          <button type="submit" style={{ padding: '10px 16px' }}>Search</button>
+        </div>
       </form>
 
       <div aria-live="polite">
